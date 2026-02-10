@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Captures - default</title>
+  <title>IA Paris 8 - 9 février 2026</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
@@ -209,7 +209,7 @@
       <button class="export-pdf" id="exportPdf">Export PDF</button>
       <button class="edit-toggle" id="editToggle">Mode edition</button>
     </div>
-    <h1>Captures - default</h1>
+    <h1>IA Paris 8 - 9 février 2026</h1>
 
       <div class="capture-row">
         <article class="card" data-capture="001_simonwillison.net_20260203_1602.png">
@@ -286,7 +286,7 @@
             <span class="date">2026-02-03 16:16:09</span>
           </div>
         </article>
-        
+        <aside class="note"><p>l’IA n’est pas “magique”, c’est une <strong>architecture socio-technique</strong> (prompts, outils, sandbox, permissions, coûts)</p></aside>
       </div>
 
       <div class="capture-row">
@@ -312,7 +312,7 @@
             <span class="date">2026-02-03 16:16:34</span>
           </div>
         </article>
-        
+        <aside class="note"><p>on ne parle pas d’“une IA”, mais de <strong>degrés d’autonomie</strong>, avec des implications artistiques et politiques différentes</p></aside>
       </div>
 
       <div class="capture-row">
@@ -351,7 +351,7 @@
             <span class="date">2026-02-03 16:18:02</span>
           </div>
         </article>
-        
+        <aside class="note"><p>l’IA s’installe par glissement, pas par rupture</p></aside>
       </div>
 
       <div class="capture-row">
@@ -416,7 +416,7 @@
             <span class="date">2026-02-04 10:14:27</span>
           </div>
         </article>
-        
+        <aside class="note"><p>L’IA ne “crée” pas seule, elle <strong>reconfigure la chaîne de création</strong> (écriture, montage, itération, diffusion)</p></aside>
       </div>
 
       <div class="capture-row">
@@ -429,7 +429,7 @@
             <span class="date">2026-02-06 10:30:11</span>
           </div>
         </article>
-        
+        <aside class="note"><p>On passe de l’outil ponctuel à la relation continue (mémoire, habitudes, style)</p></aside>
       </div>
 
       <div class="capture-row">
@@ -489,8 +489,8 @@
     const toggle = document.getElementById('editToggle');
     const exportPdf = document.getElementById('exportPdf');
     const projectName = "default";
-    const pageTitle = "Captures - default";
-    const initialNotes = {};
+    const pageTitle = "IA Paris 8 - 9 f\u00e9vrier 2026";
+    const initialNotes = {"007_danielmiessler.com_20260203_1616.png": "l’IA n’est pas “magique”, c’est une *architecture socio-technique* (prompts, outils, sandbox, permissions, coûts)", "009_interconnected.org_20260203_1616.png": "on ne parle pas d’“une IA”, mais de *degrés d’autonomie*, avec des implications artistiques et politiques différentes", "012_ntdotdev.wordpress.com_20260203_1618.png": "l’IA s’installe par glissement, pas par rupture", "018_lemonde.fr_20260204_1014.png": "L’IA ne “crée” pas seule, elle *reconfigure la chaîne de création* (écriture, montage, itération, diffusion)", "019_mitchellh.com_20260206_1030.png": "On passe de l’outil ponctuel à la relation continue (mémoire, habitudes, style)"};
 
     function ensureControls() {
       document.querySelectorAll('.card').forEach((card) => {
@@ -515,7 +515,7 @@
       editor.className = 'note-editor';
       editor.innerHTML = `
         <textarea data-note-for="${filename}" placeholder="Note markdown...">${escapeHtml(note)}</textarea>
-        <div class="note-hint">Markdown simple supporte: paragraphes, listes avec - item, italique _texte_.</div>
+        <div class="note-hint">Markdown simple: *gras*, _italique_, listes avec - item.</div>
       `;
       card.appendChild(editor);
     }
@@ -530,15 +530,16 @@
     }
 
     function markdownToHtml(raw) {
-      const lines = String(raw || '').split(/?
-/);
+      const lines = String(raw || '').split(/\r?\n/);
       const parts = [];
       let para = [];
       let inList = false;
 
       const inline = (text) => {
-        const escaped = escapeHtml(text);
-        return escaped.replace(/_(.+?)_/g, '<em>$1</em>');
+        let escaped = escapeHtml(text);
+        escaped = escaped.replace(/\*(.+?)\*/g, '<strong>$1</strong>');
+        escaped = escaped.replace(/_(.+?)_/g, '<em>$1</em>');
+        return escaped;
       };
 
       const flushPara = () => {
@@ -701,7 +702,7 @@
         try {
           await saveEditorState();
         } catch (error) {
-          alert(error.message + ' Telechargement local de l'ordre en secours.');
+          alert(error.message + " Telechargement local de l'ordre en secours.");
           downloadOrder();
         }
         toggle.textContent = 'Mode edition';

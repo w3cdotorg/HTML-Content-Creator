@@ -127,7 +127,9 @@ def load_notes(project: str) -> dict[str, str]:
 def markdown_to_html(text: str) -> str:
     def inline(value: str) -> str:
         escaped = html.escape(value)
-        return re.sub(r"_(.+?)_", r"<em>\1</em>", escaped)
+        escaped = re.sub(r"\*(.+?)\*", r"<strong>\1</strong>", escaped)
+        escaped = re.sub(r"_(.+?)_", r"<em>\1</em>", escaped)
+        return escaped
 
     lines = text.splitlines()
     parts = []
@@ -470,7 +472,7 @@ def render_html(captures, *, project: str, title: str, notes_by_capture: dict[st
       editor.className = 'note-editor';
       editor.innerHTML = `
         <textarea data-note-for="${{filename}}" placeholder="Note markdown...">${{escapeHtml(note)}}</textarea>
-        <div class="note-hint">Markdown simple supporte: paragraphes, listes avec - item, italique _texte_.</div>
+        <div class="note-hint">Markdown simple: *gras*, _italique_, listes avec - item.</div>
       `;
       card.appendChild(editor);
     }}
@@ -485,14 +487,16 @@ def render_html(captures, *, project: str, title: str, notes_by_capture: dict[st
     }}
 
     function markdownToHtml(raw) {{
-      const lines = String(raw || '').split(/\r?\n/);
+      const lines = String(raw || '').split(/\\r?\\n/);
       const parts = [];
       let para = [];
       let inList = false;
 
       const inline = (text) => {{
-        const escaped = escapeHtml(text);
-        return escaped.replace(/_(.+?)_/g, '<em>$1</em>');
+        let escaped = escapeHtml(text);
+        escaped = escaped.replace(/\*(.+?)\*/g, '<strong>$1</strong>');
+        escaped = escaped.replace(/_(.+?)_/g, '<em>$1</em>');
+        return escaped;
       }};
 
       const flushPara = () => {{
@@ -655,7 +659,7 @@ def render_html(captures, *, project: str, title: str, notes_by_capture: dict[st
         try {{
           await saveEditorState();
         }} catch (error) {{
-          alert(error.message + ' Telechargement local de l\'ordre en secours.');
+          alert(error.message + " Telechargement local de l'ordre en secours.");
           downloadOrder();
         }}
         toggle.textContent = 'Mode edition';

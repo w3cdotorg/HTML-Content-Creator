@@ -22,6 +22,7 @@ Web app + Node.js service to capture websites (1920x1080), organize them by proj
   - `Explorer les captures`
   - `Export PDF`
 - PDF export from generated HTML:
+  - title slide from the optional HTML title
   - landscape slides style
   - one capture per page
   - background preserved
@@ -32,6 +33,7 @@ Web app + Node.js service to capture websites (1920x1080), organize them by proj
 - Edit mode supports:
   - reorder captures
   - `Ajout note` per capture with markdown textarea
+  - markdown syntax in notes: `*gras*` and `_italique_`
   - save order + notes in one action
 
 ## Project Data Layout

@@ -469,6 +469,7 @@ app.post("/api/projects/:project/generate-html", async (req, res) => {
   try {
     const projectName = sanitizeProjectName(req.params.project);
     const title = await resolveProjectTitle(projectName, req.body?.title);
+    const deckTitle = title || `Captures - ${projectName}`;
     await runHtmlGeneration(projectName, title);
 
     const filename = getGeneratedHtmlFilename(projectName);
@@ -491,6 +492,7 @@ app.post("/api/projects/:project/export-pdf", async (req, res) => {
   try {
     const projectName = sanitizeProjectName(req.params.project);
     const title = await resolveProjectTitle(projectName, req.body?.title);
+    const deckTitle = title || `Captures - ${projectName}`;
     await runHtmlGeneration(projectName, title);
 
     const htmlFilename = getGeneratedHtmlFilename(projectName);
@@ -504,6 +506,18 @@ app.post("/api/projects/:project/export-pdf", async (req, res) => {
     });
 
     await page.goto(htmlUrl, { waitUntil: "networkidle", timeout: 60000 });
+
+    await page.evaluate((renderedTitle) => {
+      const main = document.querySelector("main.page");
+      if (!main) return;
+      const existing = main.querySelector(".pdf-title-slide");
+      if (existing) existing.remove();
+      const slide = document.createElement("section");
+      slide.className = "pdf-title-slide";
+      slide.innerHTML = `<h2>${renderedTitle}</h2>`;
+      main.insertBefore(slide, main.firstChild);
+    }, deckTitle);
+
     await page.addStyleTag({
       content: `
         @media print {
@@ -514,6 +528,28 @@ app.post("/api/projects/:project/export-pdf", async (req, res) => {
             print-color-adjust: exact !important;
           }
           .toolbar, h1 { display: none !important; }
+          .pdf-title-slide {
+            height: 210mm !important;
+            min-height: 210mm !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center !important;
+            padding: 18mm !important;
+            box-sizing: border-box !important;
+            break-after: page !important;
+            page-break-after: always !important;
+          }
+          .pdf-title-slide h2 {
+            margin: 0 !important;
+            font-family: "Space Grotesk", "Helvetica Neue", sans-serif !important;
+            font-size: 48px !important;
+            line-height: 1.15 !important;
+            letter-spacing: -0.02em !important;
+            color: #1f2328 !important;
+            max-width: 85% !important;
+            word-break: break-word !important;
+          }
           .page {
             max-width: none !important;
             margin: 0 !important;
@@ -524,48 +560,64 @@ app.post("/api/projects/:project/export-pdf", async (req, res) => {
             page-break-inside: avoid !important;
           }
           .capture-row {
-            min-height: 100vh;
+            height: 210mm !important;
+            min-height: 210mm !important;
             display: flex !important;
-            flex-direction: column !important;
+            flex-direction: row !important;
             align-items: center !important;
             justify-content: center !important;
+            gap: 8mm !important;
             break-after: page !important;
             page-break-after: always !important;
-            padding: 16mm 12mm;
+            padding: 6mm 8mm !important;
+            box-sizing: border-box !important;
           }
           .card {
-            min-height: calc(100vh - 32mm);
+            min-height: 0 !important;
+            height: auto !important;
             margin: 0 !important;
-            width: min(96%, 1500px) !important;
+            padding: 8mm !important;
+            width: min(70%, 1350px) !important;
+            flex: 0 0 min(70%, 1350px) !important;
+            box-shadow: none !important;
+          }
+          .capture-row .note {
+            flex: 0 0 26% !important;
+            max-width: 26% !important;
           }
           main.page > .card {
-            min-height: 100vh;
+            height: 210mm !important;
+            min-height: 210mm !important;
             display: flex !important;
             flex-direction: column !important;
             align-items: center !important;
             justify-content: center !important;
             break-after: page !important;
             page-break-after: always !important;
-            padding: 16mm 12mm;
+            padding: 8mm !important;
             margin: 0 !important;
-            border-radius: 0 !important;
-            border: none !important;
-            box-shadow: none !important;
             width: 100% !important;
+            box-sizing: border-box !important;
+            box-shadow: none !important;
           }
           main.page > .card:last-child,
           .capture-row:last-child {
             break-after: auto !important;
             page-break-after: auto !important;
           }
+          .shot-block {
+            max-width: 100% !important;
+            margin: 0 !important;
+          }
           .shot {
-            max-height: 68vh;
+            max-height: 56vh !important;
+            width: 100% !important;
             object-fit: contain;
           }
           .note {
             position: static !important;
             width: auto !important;
-            margin-top: 12px !important;
+            margin: 0 !important;
           }
         }
       `
