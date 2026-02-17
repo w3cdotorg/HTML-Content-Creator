@@ -1,6 +1,3 @@
 node_modules
 screenshots/*.png
 .env
-DerivedData/
-*.xcuserstate
-xcuserdata/
